@@ -160,7 +160,10 @@ def main():
 
     tmp_file = f".tmp_{time.time()}.png"
     if args.mode == "all":
+        t0 = time.perf_counter()
         masks = efficientvit_mask_generator.generate(raw_image)
+        t1 = time.perf_counter()
+        print(f"Generate time: {t1 - t0:.4f}s")
         plt.figure(figsize=(20, 20))
         plt.imshow(raw_image)
         show_anns(masks)
@@ -172,11 +175,14 @@ def main():
         point_labels = [l for _, _, l in args.point]
 
         efficientvit_sam_predictor.set_image(raw_image)
+        t0 = time.perf_counter()
         masks, _, _ = efficientvit_sam_predictor.predict(
             point_coords=np.array(point_coords),
             point_labels=np.array(point_labels),
             multimask_output=args.multimask,
         )
+        t1 = time.perf_counter()
+        print(f"Generate time: {t1 - t0:.4f}s")
         plots = [
             draw_scatter(
                 draw_binary_mask(raw_image, binary_mask, (0, 0, 255)),
@@ -193,12 +199,15 @@ def main():
     elif args.mode == "box":
         args.box = yaml.safe_load(args.box)
         efficientvit_sam_predictor.set_image(raw_image)
+        t0 = time.perf_counter()
         masks, _, _ = efficientvit_sam_predictor.predict(
             point_coords=None,
             point_labels=None,
             box=np.array(args.box),
             multimask_output=args.multimask,
         )
+        t1 = time.perf_counter()
+        print(f"Generate time: {t1 - t0:.4f}s")
         plots = [
             draw_bbox(
                 draw_binary_mask(raw_image, binary_mask, (0, 0, 255)),
